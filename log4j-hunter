@@ -1,0 +1,53 @@
+#!/bin/sh
+# Author: Gleydson Mazioli <gleydson@spiritsec.com>
+# Spiritsec - 11/12/2021
+# Ver: 0.01
+
+# This program was written to help you finding possible 
+# installed log4j packages on your system. It auto-detects
+# and support Debian, RPM, an Suse based distros, as well
+# locally installed packages (Slackware, OpenWrt, and others)
+# 
+# Its exit code system have been designed to help you to use in 
+# automations, checking following values
+# 0 - No log4j packages or java detected
+# 1 - Log4j packages found 
+# 2 - No log4j packages found, but java found (jar/war/ear)
+
+# Detect system (deb, yum, zypper)
+
+if [ -x "/usr/bin/dpkg" ]; then
+    dpkg --get-selections | grep log4j | grep -v log4js >/tmp/log4j-hunter.XXXXXX
+    if [ $? -eq 0 ]; then
+        echo "x Found log4j packages, it's need your attention"
+	    cat /tmp/log4j-hunter.XXXXXX; rm -f /tmp/log4j-hunter.XXXXXX
+        exit 1
+    fi
+elif [ -x "/bin/yum" -o -x "/bin/zypper" ]; then
+    rpm -qa | grep log4j | grep -v log4js >/tmp/log4j-hunter.XXXXXX
+    if [ $? -eq 0 ]; then
+        echo "x Found log4j packages, it's need your attention"
+  	    cat /tmp/log4j-hunter.XXXXXX; rm -f /tmp/log4j-hunter.XXXXXX
+        exit 1
+    fi
+else
+    echo "System isn't Debian, RedHat or SuSe based, trying to find locally installed log4j packages"
+fi
+
+
+echo "No one package related to log4j found... trying to find locally installed packages"
+echo "Dont worry, I'll be using just idle calls to avoid system performance impactes during I/O lookup"
+ionice -c 3 find / -name "log4j" 2>/dev/null | grep -v 'log4js' >/tmp/log4j-hunter.XXXXXX
+if [ $? -eq 0 ]; then
+    echo "x Found log4j packages, it's need your attention"
+    cat /tmp/log4j-hunter.XXXXXX; rm -f /tmp/log4j-hunter.XXXXXX
+    exit 1
+fi
+
+if [ "$(which java)" ]; then
+  echo "x Java found. Just investigate if your java files (or binary application) use log4j for logging"
+  exit 2
+fi
+echo "No log4j or java found using methods above."
+rm -f /tmp/log4j-hunter.XXXXXX
+:
