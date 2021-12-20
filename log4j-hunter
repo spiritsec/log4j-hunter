@@ -19,21 +19,21 @@
 if [ -x "/usr/bin/dpkg" ]; then
     dpkg --get-selections | grep log4j | grep -v log4js >/tmp/log4j-hunter.XXXXXX
     if [ $? -eq 0 ]; then
-        echo "x Found log4j packages, it's need your attention"
+        echo "x dpkg Found log4j packages, it's need your attention"
 	    cat /tmp/log4j-hunter.XXXXXX; rm -f /tmp/log4j-hunter.XXXXXX
         exit 1
     fi
 elif [ -x "/bin/pacman" ]; then
     pacman -Q | grep log4j | grep -v log4js >/tmp/log4j-hunter.XXXXXX
     if [ $? -eq 0 ]; then
-        echo "x Found log4j packages, it's need your attention"
+        echo "x pacman Found log4j packages, it's need your attention"
   	    cat /tmp/log4j-hunter.XXXXXX; rm -f /tmp/log4j-hunter.XXXXXX
         exit 1
     fi
 elif [ -x "/bin/yum" -o -x "/bin/zypper" ]; then
     rpm -qa | grep log4j | grep -v log4js >/tmp/log4j-hunter.XXXXXX
     if [ $? -eq 0 ]; then
-        echo "x Found log4j packages, it's need your attention"
+        echo "x rpm Found log4j packages, it's need your attention"
   	    cat /tmp/log4j-hunter.XXXXXX; rm -f /tmp/log4j-hunter.XXXXXX
         exit 1
     fi
